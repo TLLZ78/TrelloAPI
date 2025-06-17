@@ -143,7 +143,7 @@ a{
     padding-top: 4px;
     border-radius: 5px;
     margin-top: 10px;
-    background-color: rgb(252, 252, 218);
+    background-color: #88b0d3; 
    /*background-color: #88b0d3; Fundo azul claro*/
     width: 99%;
     height: 500px;
@@ -255,6 +255,24 @@ a{
     top: 0px;
     right: 0px;
     text-align: center;
+}
+
+.placeholder {
+    height: 120px; /* Altura do espaço reservado */
+    width: 190px;
+    background-color: rgba(0, 0, 0, 0.1); /* Cor de fundo para destacar */
+    border: 2px dashed #ccc; /* Borda para indicar a posição */
+    margin: 5px 0; /* Espaçamento */
+}
+
+.column-placeholder {
+    width: 200px; /* Largura do espaço reservado */
+    height: 300px; /* Altura total da coluna */
+    background-color: rgba(0, 0, 0, 0.1); /* Cor de fundo para destacar */
+    border: 2px dashed #ccc; /* Borda para indicar a posição */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .tituloQuadro{

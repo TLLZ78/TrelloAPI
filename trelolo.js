@@ -51,6 +51,7 @@ function adicionarTask(botao){
     const coluna = botao.closest('.coluna'); // Encontra a coluna mais próxima do botão clicado
     const novaTask = document.createElement('div');
     novaTask.className = 'task';
+    novaTask.draggable = 'true';
     novaTask.innerHTML = `
         <div class="taskHead" contenteditable="true" oninput="saveData()">Nova Task
         <span class="deleteTask" onclick="remover(this)">X</span>
@@ -66,6 +67,7 @@ function addColuna(){
     console.log("funcionando");
     const novaColuna = document.createElement("div");
     novaColuna.className = 'coluna';
+    novaColuna.draggable = 'true';
     novaColuna.innerHTML =  `
     <div class="colunaHead"><h2 contenteditable="true" oninput="saveData()">Nova Lista</h2>
     <span class="deleteColuna" onclick="remover(this)">X</span>
@@ -174,7 +176,11 @@ async function carregarQuadrosNoDropdown() {
             data.forEach(board => {
           //       if ((board.Name || '').includes(filtro)) { // Só adiciona se passar no filtro
                 const button = document.createElement('a');
-                button.textContent = board.Name || 'Quadro sem nome';
+                if(!board.Name){
+                button.textContent = `#${board.Id} Quadro Sem Nome`
+                }else{
+                button.textContent = `#${board.Id} ${board.Name}`;
+                }
                 button.href = '#';
                 // Passa o BoardId para mostrarQuadro
                 button.onclick = () => mostrarQuadro(board.Id, board.Name);
@@ -187,8 +193,11 @@ async function carregarQuadrosNoDropdown() {
 
 // Mostra o quadro selecionado e carrega suas tasks da API
 async function mostrarQuadro(boardId, boardName) {
+    if(!boardName){
+        boardName = "Quadro Sem Nome"
+    }
     const teste = document.getElementById('QUADRO');
-    document.querySelector('.tituloQuadro').innerText = boardName || '';
+    document.querySelector('.tituloQuadro').innerText = `#${boardId}  ${boardName}` || '';
     teste.style.display = 'flex';
 
     const quadro = document.querySelector('.quadro');
@@ -204,6 +213,7 @@ async function mostrarQuadro(boardId, boardName) {
                 const colunaInfo = colunaData.Column;
                 const novaColuna = document.createElement('div');
                 novaColuna.className = 'coluna';
+                novaColuna.draggable = 'true';
                 novaColuna.innerHTML = `
                     <div class="colunaHead">
                         <h2 contenteditable="true">${colunaInfo.Title || 'Sem título'}</h2>
@@ -219,6 +229,7 @@ async function mostrarQuadro(boardId, boardName) {
                     colunaData.Tasks.forEach(task => {
                         const novaTask = document.createElement('div');
                         novaTask.className = 'task';
+                        novaTask.draggable = 'true';
                         novaTask.innerHTML = `
                             <div class="taskHead" contenteditable="true">
                                 ${task.Title || 'Sem título'}
