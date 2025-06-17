@@ -1,0 +1,270 @@
+*{
+    font-family: sans-serif;
+}
+
+body{
+    background-color: #144272;
+}
+.navbar{
+    border-radius: 4px;
+    background: #0A2647;
+    color: aliceblue;
+    padding-left: 18px;
+    padding-right: 18px;
+    border: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: rgb(9, 9, 18) 3px 3px 3px;
+}
+
+.botoes{
+    display: flex;
+    gap: 15px;
+    margin-top: 3px;
+}
+
+.dropDownContent{
+    padding: 3px;
+    margin-top: 4px;
+    margin-right: 7px;
+    display: none;
+    position: absolute;
+    background-color: #0e6ba8;
+    width: 150px;
+    z-index: 1;
+    right: 0;
+    border: solid 2px black;
+    
+}
+
+.dropDownContent a{
+    text-decoration: none;
+    color: aliceblue;
+}
+
+.dropDownContent :hover{
+    font-weight: bolder;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.dropbtn{
+    border-radius: 2px;
+    background-color: #444;
+    cursor: pointer;
+    width: 105x;
+    height: 35px;
+    color: rgb(26, 62, 94);
+}
+
+.botoes button{
+ background-color: rgb(9, 35, 65);
+ color: aliceblue;
+ box-shadow: white 1px 1px;
+}
+
+.dropDown:hover .dropDownContent{
+    display: block;
+    
+}
+
+.content{
+    flex: 3;
+    padding: 13px;
+    display: flex;
+    align-content: center;
+    align-items: center;
+}
+
+.ddc{
+    border: 5px solid transparent;
+   
+}
+
+a{
+    border: solid 2px black;
+    display: flex;
+    padding: 10px;
+    justify-content: space-between;
+}
+
+.novoQuadro{
+    display: none;
+    flex-direction: column;
+    background-color:#2C74B3;
+    margin-top: 40px;
+    border: 4px solid black;
+    width: 448px; /* Aumentado em 60% (280px * 1.6) */
+    height: 288px; /* Aumentado em 60% (180px * 1.6) */
+    color: aliceblue;
+    justify-self: center
+}
+
+.novoQuadroHead{
+    border-bottom: 3px solid black;
+    height: 60px;
+    text-align: center;
+    background-color: #205295;
+}
+.novoQuadro input{
+    align-self: center;
+    width: 384px; /* Aumentado em 60% (240px * 1.6) */
+    height: 22px;
+}
+.novoQuadro button{
+    align-self: center;
+    margin-top: 10px;
+    width: 128px; /* Aumentado em 60% (80px * 1.6) */
+    height: 2em;
+}
+
+
+.novoQuadro button:hover{
+    cursor: pointer;
+}
+.novoQuadro h2{
+    margin-top: 15px;
+    font-size: 1.7em; /* Aumentado em 60% */
+}
+
+.novoQuadro label{
+    margin-top: 10px;
+    margin-left: 27px;
+    margin-bottom: 15px;
+    font-size: 1.6em; /* Aumentado em 60% */
+}
+
+.quadro{
+    display: flex;
+    flex-direction: row;
+    justify-items:baseline;
+    padding-inline: 6px;
+    padding-top: 4px;
+    border-radius: 5px;
+    margin-top: 10px;
+    background-color: rgb(252, 252, 218);
+   /*background-color: #88b0d3; Fundo azul claro*/
+    width: 99%;
+    height: 500px;
+    gap: 10px;
+}
+
+.adicionarC{
+    align-content:center;
+    text-align: center;
+    border: 2px solid black;
+    border-radius: 20px;
+    width: 180px;
+    height: 30px;
+    background-color: #205295;
+    color: white
+
+}
+
+.coluna{
+    display: relative;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid black;
+    background-color: #2C74B3;
+    color: white;
+    width: 220px;
+    height: 98%;
+    margin-left: 15px;
+    
+}
+
+.colunaHead{
+    border-bottom: 2px solid black;
+    background-color: #144272;
+    color: aliceblue;
+    position: relative
+}
+
+.coluna h2{
+    margin-left: 8px;
+}
+
+.colunaBody{
+    margin-top: 15px;
+    justify-items:center;
+    
+    
+}
+
+.adicionarTask{
+    align-content: center;
+    text-align: center;
+    border: 2px solid black;
+    border-radius: 20px;
+    width: 180px;
+    height: 30px;
+    color: white;
+    background-color: #144272;
+   
+}
+
+.adicionarTask:hover{
+    box-shadow: 0px 8px 16px black;
+}
+
+.adicionarC:hover{
+    box-shadow: 0px 8px 16px black;
+}
+
+
+
+.task{
+    display:block;
+    border: 2px solid black;
+    background-color: #406fa1 ;
+    color: white;
+    width: 200px;
+    height: 100px;
+    margin-bottom: 15px;
+}
+
+.taskHead{
+    border-bottom: 2px solid black;
+    background-color: #144272;
+    color: aliceblue;
+}
+
+.taskBody{
+    padding: 5px;
+    margin-top: 5px;
+    
+}
+
+.deleteTask{
+    background-color: #ff0000;
+    padding: 2px;
+    color: white;
+    align-items:center;
+    float: right;
+}
+
+.deleteColuna {
+    background-color: #ff0000;
+    color: white;
+    float: right;
+    align-items: center;
+    position:absolute;
+    padding: 2px;
+    top: 0px;
+    right: 0px;
+    text-align: center;
+}
+
+.tituloQuadro{
+    color: aliceblue;
+    font-weight: bold;
+    font-size:xx-large;
+    margin-top: 15px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+#QUADRO{
+    flex-direction: column;
+}
