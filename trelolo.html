@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trellinho</title>
+    <title>Tralha</title>
     <link rel="stylesheet" href="stylele.css">
 </head>
 <body>
@@ -11,23 +11,35 @@
     <div class="navbar">
         <h2>Tralha</h2>
     <div class="botoes">
+        <img class="paletaTralha" src="paleta.png">
         <button id="btnCriar" class="dropbtn" onclick="botaoNovoQuadro()">Novo Quadro</button>
         <div class="dropDown">
             <button  id="btn" class="dropbtn">Quadros</button>
             <div class="ddc">
                 <div class="dropDownContent">
+                    <a href="#">Quadro 1</a>
                 </div>
             </div>
         </div>
     </div>
     </div>
-    <div id="QUADRO"  style="display: none;">
-        <div class="tituloQuadro">
 
+    <!-- 
+    <div id="telaInicial">
+        <h1>Bem-vindo ao Tralha</h1>
+        <button onclick="botaoNovoQuadro()">Criar Novo Quadro</button>
+    </div>
+    -->
+
+    <div id="QUADRO" style="display: none;">
+        <div class="tituloQuadro">
+            <span>Quadro de Testes</span>
+            <button class="excluirBoardBtn" onclick="excluirQuadro()">Excluir Quadro</button>
+            <span class="closeQuadro" onclick="fecharQuadro()">X</span>
         </div>
-    
+
         <div class="quadro">
-            
+           <!--   Quadros serão injetados aqui dinamicamente  --> 
         </div>
     </div>
        
@@ -40,7 +52,7 @@
         <input id ="nomeQuadro" type="text" placeholder="Meu quadro trelo" onkeydown="verificarEnter(event)">
         <button type="button" onclick="criarQuadro()">Criar</button>
     </div>
-     
+
 </body>
 <script src="trelolo.js"></script>
 <script src="dragAndDrop.js"></script>
