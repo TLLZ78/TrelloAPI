@@ -1,240 +1,353 @@
-function criarQuadro(){
+// --- Endpoints da API (Mantidos como estão) ---
+const getBoardsEndpoint = 'https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/GetBoards';
+const createOrUpdateBoardEndpoint = 'https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/CreateOrUpdateBoard';
+const criaColunaEndPoint = "https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/CreateOrUpdateColumn";
+const criaTaskEndPoint = "https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/CreateOrUpdateTask";
+const deleteTaskEndpoint = "https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/DeleteTask";
 
-    const nome = document.getElementById('nomeQuadro').value;
-    const allBoards = JSON.parse(localStorage.getItem("boards")) || {};
+// --- Variáveis globais para gerenciar o estado do quadro atual ---
+let currentBoardId = null; // Armazena o ID do quadro atualmente carregado
+let currentBoardName = ''; // Armazena o nome do quadro atualmente carregado
+
+// --- Elementos DOM para controle de visibilidade/loading ---
+const novoQuadroModal = document.getElementById("novoQuadro");
+const btnCriar = document.getElementById('btnCriar');
+const quadroTela = document.getElementById('QUADRO');
+const quadroBodyContainer = document.querySelector('.quadro'); // Onde as colunas e tasks são injetadas
+const dropdownContent = document.querySelector('.dropDownContent'); // O conteúdo do dropdown "Quadros"
+const quadroTituloSpan = document.querySelector('.tituloQuadro > span'); // O span dentro do tituloQuadro
+const tituloBoardActionsDiv = document.querySelector('.titleBoardActions'); // A div que contém os botões Salvar e Fechar
+
+const paletaCores = document.getElementById('paletaCores');
+const seletorCorInput = document.getElementById('seletorCor');
+
+
+// Função para mostrar/esconder o overlay de carregamento
+function showLoading(message = "Carregando...") {
+    loadingOverlay.querySelector('span').textContent = message;
+    loadingOverlay.style.display = 'flex';
+}
+
+function hideLoading() {
+    loadingOverlay.style.display = 'none';
+}
+
+// --- Funções de Manipulação da UI (Pop-ups, Adicionar/Remover Elementos) ---
+
+function botaoNovoQuadro() {
+    if (novoQuadroModal.style.display === 'none') {
+        novoQuadroModal.style.display = 'flex';
+        document.getElementById('nomeQuadro').value = '';
+    } else {
+        novoQuadroModal.style.display = "none";
+    }
+}
+window.addEventListener('click', function(event) {
     
+    // Primeiro, verifica se o pop-up está visível
+    // Usamos 'flex' porque é o display que você usa para exibi-lo
+    if (novoQuadroModal.style.display === 'flex') {
 
-    if(nome === ""){
-        alert("A area não pode estar vazia");
-        return;
-    }
-
-    if (allBoards[nome]) {
-        alert("Já existe um quadro com esse nome. Escolha outro nome.");
-        return;
-    }
-
-    alert("Novo quadro criado");
-    botaoNovoQuadro();
-    mostrarQuadro(nome);
-
-    const novoQuadro = document.createElement('a');
-    novoQuadro.innerText = "NovoQuadro";
-    document.body.appendChild(novoParagrafo);
-
-    carregarQuadrosNoDropdown();
-}
-
-async function carregarQuadrosNoDropdown() {
-    const dropdown = document.querySelector('.dropDownContent');
-    dropdown.innerHTML = ''; // Limpa o dropdown antes de adicionar novos quadros
-
-        const response = await fetch('https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/GetBoards');
-        const data = await response.json();
-
-        if (Array.isArray(data) && data.length > 0 ) {
-            //const filtro = "testanto";
+        // Agora, verifica se o alvo do clique NÃO está contido no pop-up
+        // E também se o alvo NÃO é o botão que abre o pop-up (para evitar que ele feche assim que abrir)
+        if (!novoQuadroModal.contains(event.target) && event.target !== btnCriar) {
             
-
-            data.forEach(board => {
-          //       if ((board.Name || '').includes(filtro)) { // Só adiciona se passar no filtro
-                const button = document.createElement('a');
-                if(!board.Name){
-                button.textContent = `#${board.Id} Quadro Sem Nome`
-                }else{
-                button.textContent = `#${board.Id} ${board.Name}`;
-                }
-                button.href = '#';
-                // Passa o BoardId para mostrarQuadro
-                button.onclick = () => mostrarQuadro(board.Id, board.Name);
-                dropdown.appendChild(button);   
-        //    }
-            });
-        } 
-}
-
-function botaoNovoQuadro(){ //pop up
-    const doc = document.getElementById("novoQuadro");
-
-        if(doc.style.display === 'none'){
-            doc.style.display = 'flex';
-            
-        } else if(doc.style.display === "flex"){
-            doc.style.display = "none";
+            // Se as condições forem verdadeiras, o clique foi fora. Escondemos o pop-up.
+            novoQuadroModal.style.display = 'none';
+            console.log("Pop-up 'Novo Quadro' fechado por clique externo.");
         }
-}
-
-function adicionarTask(botao){
-    const coluna = botao.closest('.coluna'); // Encontra a coluna mais próxima do botão clicado
-    const novaTask = document.createElement('div');
-    novaTask.className = 'task';
-    novaTask.draggable = 'true';
-    novaTask.innerHTML = `
-        <div class="taskHead">
-            <div class="taskTitle" contenteditable="true">Titulo task</div>
-            <div class="taskActions">
-                <button id="minimiza" class="minimiza" contenteditable="false" onclick="minimizarTask(this)">-</button>
-                <button class="deleteTask" contenteditable="false" onclick="removerTask(this)">X</button>
-            </div>
-        </div>
-        <div class="taskBody">
-            <div class="taskDescription" contenteditable="true">Descrição da nova task</div>
-        </div>
-    `;
-    coluna.querySelector('.colunaBody').insertBefore(novaTask, botao); // Insere a nova task antes do botão
-    novaTask.querySelector('.taskTitle').addEventListener('input', salvarQuadro);
-    novaTask.querySelector('.taskDescription').addEventListener('input', salvarQuadro);
-}
-
-function addColuna(){
-    const novaColuna = document.createElement("div");
-    novaColuna.className = 'coluna';
-    novaColuna.draggable = "ture";
-    novaColuna.innerHTML =  `
-            <div class="colunaHead">
-                <div class="colunaHeadTop">
-                    <button id="minimiza" class="minimiza" contenteditable="false" onclick="minimizarLista(this)">-</button>
-                    <button class="deleteColuna" onclick="removerColuna(this)">X</button>
-                </div>
-                <h2 contenteditable="true">Nova Lista</h2>
-            </div>
-    <div class="colunaBody">
-    <div class="adicionarTask" id="addTask" onclick="adicionarTask(this)">Adicionar Task</div>
-    </div>`;
-    document.getElementById('colunaBotao').insertAdjacentElement('beforebegin', novaColuna);
-    novaColuna.querySelector('h2[contenteditable="true"]').addEventListener('input', salvarQuadro);
-    //salvarQuadro();
-}
-
-function verificarEnter(event) {
-    if (event.key === "Enter") {
-        criarQuadro(); // Chama a função criarQuadro ao pressionar Enter
     }
-} 
+});
 
-function removerColuna(element) {
-    // Remove a coluna correspondente
-    const coluna = element.closest('.coluna');
-    if (coluna) {
-        coluna.remove();
+async function criarQuadro() {
+    const nomeInput = document.getElementById('nomeQuadro');
+    const nomeQuadro = nomeInput.value.trim();
+
+    if (nomeQuadro === "") {
+        alert("O nome do quadro não pode estar vazio.");
+        return;
     }
-   // salvarQuadro()
 
-}
+    showLoading("Criando Quadro..."); // Mostra loading
 
-function removerTask(element) {
-    // Remove a task correspondente
-    const task = element.closest('.task');
-    if (task) {
-        task.remove();
-    }
-    //salvarQuadro()
+    try {
+        const boardData = {
+            Name: nomeQuadro,
+            Description: "",
+            BackgroundColor: ""
+        };
 
-}
-
-function saveData() {
-    const colunas = document.querySelectorAll('.coluna');
-    const boardData = [];
-
-    colunas.forEach(coluna => {
-        const colunaHead = coluna.querySelector('.colunaHead h2').innerText.trim();
-        const tasks = [];
-        const taskElements = coluna.querySelectorAll('.task');
-
-        taskElements.forEach(task => {
-            const taskHead = task.querySelector('.taskHead')
-            const taskBody = task.querySelector('.taskBody').innerText.trim();
-            const deleteButton = taskHead.querySelector('.deleteTask');
-            if (deleteButton) deleteButton.remove();
-
-            const taskHeadText = taskHead.innerText.trim();
-            tasks.push({ title: taskHeadText, description: taskBody });
-
-            if (deleteButton) taskHead.appendChild(deleteButton);
+        const response = await fetch(createOrUpdateBoardEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(boardData)
         });
 
-        boardData.push({ columnTitle: colunaHead, tasks });
-    });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro ao criar quadro: ${response.status} - ${errorText}`);
+        }
 
-    const currentBoardName = document.querySelector('.tituloQuadro').innerText.trim();
-    const allBoards = JSON.parse(localStorage.getItem('boards')) || {};
-    allBoards[currentBoardName] = boardData;
+        const newBoardId = parseInt(await response.text());
+        if (isNaN(newBoardId)) {
+            throw new Error("ID do quadro inválido retornado pela API.");
+        }
 
-    localStorage.setItem('boards', JSON.stringify(allBoards));
+        alert(`Quadro "${nomeQuadro}" criado com sucesso!`);
+
+        botaoNovoQuadro(); // Oculta o pop-up
+        await mostrarQuadro(newBoardId, nomeQuadro); // Carrega o quadro recém-criado
+        await carregarQuadrosNoDropdown(); // Atualiza o dropdown
+
+    } catch (error) {
+        console.error("Erro ao criar quadro na API:", error);
+        alert("Ocorreu um erro ao criar o quadro. Verifique o console para mais detalhes.");
+    } finally {
+        hideLoading(); // Esconde loading
+    }
 }
 
-function atualizarListaQuadros() {
-    const quadrosSalvos = JSON.parse(localStorage.getItem('quadros')) || [];
-    const dropDownContent = document.querySelector('.dropDownContent');
+// Melhoria para o botão "Quadros" no navbar
+document.querySelector('#btn').addEventListener('click', function() {
+    if (dropdownContent.style.display === 'block') {
+        dropdownContent.style.display = 'none';
+    } else {
+        dropdownContent.style.display = 'block';
+    }
+});
 
-    // Limpa a lista atual
-    dropDownContent.innerHTML = '';
 
-    // Adiciona cada quadro salvo a lista
-    quadrosSalvos.forEach((quadro, index) => {
-        const link = document.createElement('a');
-        link.href = '#';
-        link.innerText = quadro.nome;
-        const nomeQuadro = document.querySelector('.tituloQuadro span').innerText.trim();
-        link.onclick = () => carregarQuadro(index); 
-        dropDownContent.appendChild(link);
-    });
+async function carregarQuadrosNoDropdown() {
+    dropdownContent.innerHTML = ''; // Limpa o dropdown antes de adicionar novos quadros
+
+    try {
+        const response = await fetch(getBoardsEndpoint);
+        if (!response.ok) {
+            throw new Error(`Erro ao carregar quadros: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+            data.forEach(board => {
+                const button = document.createElement('a');
+                const boardDisplayName = board.Name ? board.Name : `Sem Nome `;
+                button.textContent = `#${board.Id} ${boardDisplayName}`;
+                button.href = '#';
+                button.onclick = async (e) => {
+                    e.preventDefault();
+                    dropdownContent.style.display = 'none'; // Fecha o dropdown ao selecionar
+                    await mostrarQuadro(board.Id, board.Name);
+                };
+                dropdownContent.appendChild(button);
+            });
+        } else {
+            const noBoardsMsg = document.createElement('span');
+            noBoardsMsg.textContent = 'Nenhum quadro encontrado.';
+            noBoardsMsg.style.padding = '10px';
+            noBoardsMsg.style.color = 'white';
+            dropdownContent.appendChild(noBoardsMsg);
+        }
+    } catch (error) {
+        console.error("Erro ao carregar quadros no dropdown:", error);
+        const errorMsg = document.createElement('span');
+        errorMsg.textContent = 'Erro ao carregar quadros.';
+        errorMsg.style.padding = '10px';
+        errorMsg.style.color = 'red';
+        dropdownContent.appendChild(errorMsg);
+    }
 }
+
+async function SaveBoard() {
+    if (!currentBoardId) {
+        alert("Não há um quadro selecionado para salvar. Crie ou selecione um quadro primeiro.");
+        return;
+    }
+
+    showLoading("Salvando Quadro..."); // Mostra loading
+
+    try {
+        // 1. Coleta os dados do quadro atual (nome, Id)
+        // Pega o texto do span de título, removendo o ID para obter apenas o nome
+        const boardTitleText = quadroTituloSpan.textContent;
+        const boardName = boardTitleText.replace(`#${currentBoardId}`, '').trim();
+        const backgroundColor = quadroBodyContainer.dataset.bgColor || '#88b0d3';
+
+        const boardToSave = {
+            Id: currentBoardId,
+            Name: boardName,
+            Description: "",
+            HexadecimalColor: backgroundColor // Se você tiver um campo para descrição do quadro, adicione aqui
+        };
+
+        // Salva/Atualiza o quadro principal
+        const boardResponse = await fetch(createOrUpdateBoardEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(boardToSave)
+        });
+
+        if (!boardResponse.ok) {
+            const errorText = await boardResponse.text();
+            throw new Error(`Erro ao salvar quadro principal: ${boardResponse.status} - ${errorText}`);
+        }
+        console.log(`Quadro "${boardToSave.Name}" (ID: ${currentBoardId}) salvo/atualizado com sucesso.`);
+
+
+        // 2. Coleta e salva/atualiza as colunas
+        const colunasElementos = quadroBodyContainer.querySelectorAll('.coluna');
+        for (const colunaElemento of colunasElementos) {
+            const columnId = colunaElemento.dataset.columnId ? parseInt(colunaElemento.dataset.columnId) : 0;
+            const columnTitle = colunaElemento.querySelector('.colunaHead h2').innerText.trim();
+
+            const columnToSave = {
+                Id: columnId,
+                BoardId: currentBoardId,
+                Title: columnTitle
+            };
+
+            const columnResponse = await fetch(criaColunaEndPoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(columnToSave)
+            });
+
+            if (!columnResponse.ok) {
+                const errorText = await columnResponse.text();
+                throw new Error(`Erro ao salvar coluna "${columnTitle}": ${columnResponse.status} - ${errorText}`);
+            }
+
+            const newColumnId = parseInt(await columnResponse.text());
+            if (isNaN(newColumnId)) {
+                throw new Error("ID da coluna inválido retornado pela API.");
+            }
+
+            if (columnId === 0) { // Se for uma nova coluna, atualiza o ID no DOM
+                colunaElemento.dataset.columnId = newColumnId;
+                console.log(`Coluna "${columnTitle}" criada com ID: ${newColumnId}`);
+            } else {
+                console.log(`Coluna "${columnTitle}" (ID: ${columnId}) atualizada.`);
+            }
+
+            // 3. Coleta e salva/atualiza as tasks dentro desta coluna
+            const tasksElementos = colunaElemento.querySelectorAll('.task');
+            for (const taskElemento of tasksElementos) {
+                const taskId = taskElemento.dataset.taskId ? parseInt(taskElemento.dataset.taskId) : 0;
+                const taskTitle = taskElemento.querySelector('.taskTitle').innerText.trim();
+                const taskDescription = taskElemento.querySelector('.taskDescription').innerText.trim();
+
+                const taskToSave = {
+                    Id: taskId,
+                    ColumnId: parseInt(colunaElemento.dataset.columnId), // Garante que o ColumnId é o da API
+                    Title: taskTitle,
+                    Description: taskDescription
+                };
+
+                const taskResponse = await fetch(criaTaskEndPoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskToSave)
+                });
+
+                if (!taskResponse.ok) {
+                    const errorText = await taskResponse.text();
+                    throw new Error(`Erro ao salvar tarefa "${taskTitle}": ${taskResponse.status} - ${errorText}`);
+                }
+
+                const newTaskId = parseInt(await taskResponse.text());
+                if (isNaN(newTaskId)) {
+                    throw new Error("ID da tarefa inválido retornado pela API.");
+                }
+
+                if (taskId === 0) { // Se for uma nova tarefa, atualiza o ID no DOM
+                    taskElemento.dataset.taskId = newTaskId;
+                    console.log(`Tarefa "${taskTitle}" criada com ID: ${newTaskId}`);
+                } else {
+                    console.log(`Tarefa "${taskTitle}" (ID: ${taskId}) atualizada.`);
+                }
+            }
+        }
+
+        alert("Quadro e todo o seu conteúdo salvos com sucesso na API!");
+
+    } catch (error) {
+        console.error("Erro ao salvar o quadro completo:", error);
+        alert("Ocorreu um erro ao salvar o quadro. Verifique o console para mais detalhes.");
+    } finally {
+        hideLoading(); // Esconde loading
+    }
+}
+
 
 async function mostrarQuadro(boardId, boardName) {
-    if(!boardName){
-        boardName = "Quadro Sem Nome"
-    }
-    const teste = document.getElementById('QUADRO');
-    document.querySelector('.tituloQuadro').innerHTML = 
-    `#${boardId}  ${boardName} <span class="closeQuadro" onclick="fecharQuadro()">X</span>` || '';
-    
-    teste.style.display = 'flex';
+    showLoading("Carregando Quadro..."); // Mostra loading
 
-    const quadro = document.querySelector('.quadro');
-    quadro.innerHTML = '';
+    // Armazena o ID e nome do quadro atualmente carregado
+    currentBoardId = boardId;
+    currentBoardName = boardName || "Sem Nome"; // Fallback para nome vazio
+
+    // Prepara o título e os botões
+    // O span é para o título, a div.titleBoardActions é para os botões.
+    // O CSS deve posicionar titleBoardActions à direita dentro de .tituloQuadro
+    quadroTituloSpan.textContent = `${boardName ? `#${boardId} ${boardName}` : `#${boardId} Sem Nome`}`;
+
+    quadroTela.style.display = 'flex';
+    quadroBodyContainer.innerHTML = ''; // Limpa o quadro antes de carregar novos dados
 
     try {
         const response = await fetch(`https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/GetCompleteBoard?BoardId=${boardId}`);
+        if (!response.ok) {
+            throw new Error(`Erro ao carregar dados do quadro: ${response.status}`);
+        }
         const boardData = await response.json();
 
-        // Agora usamos boardData.ColumnStrs
-        if (Array.isArray(boardData.ColumnStrs)) {
+         if (boardData.Board && boardData.Board.HexadecimalColor) {
+                    const corSalva = boardData.Board.HexadecimalColor;
+                    aplicarCorDeFundo(corSalva);
+                    seletorCorInput.value = corSalva; // Atualiza o valor do seletor
+                } else {
+                    // Se não houver cor salva, aplica uma cor padrão
+                    const corPadrao = '#88b0d3';
+                    aplicarCorDeFundo(corPadrao);
+                    seletorCorInput.value = corPadrao;
+                }
+
+        if (boardData && Array.isArray(boardData.ColumnStrs)) {
             boardData.ColumnStrs.forEach(colunaData => {
                 const colunaInfo = colunaData.Column;
                 const novaColuna = document.createElement('div');
                 novaColuna.className = 'coluna';
                 novaColuna.draggable = 'true';
+                novaColuna.dataset.columnId = colunaInfo.Id;
                 novaColuna.innerHTML = `
                     <div class="colunaHead">
                         <div class="colunaHeadTop">
                             <button id="minimiza" class="minimiza" contenteditable="false" onclick="minimizarLista(this)">-</button>
                             <button class="deleteColuna" onclick="removerColuna(this)">X</button>
                         </div>
-                    <h2 contenteditable="true">${colunaInfo.Title || 'Sem título'}</h2>
+                        <h2 contenteditable="true">${colunaInfo.Title || 'Sem título'}</h2>
                     </div>
                     <div class="colunaBody"></div>
                 `;
 
                 const colunaBody = novaColuna.querySelector('.colunaBody');
 
-                // colunaData.Tasks é o array de tarefas
                 if (Array.isArray(colunaData.Tasks)) {
                     colunaData.Tasks.forEach(task => {
                         const novaTask = document.createElement('div');
                         novaTask.className = 'task';
                         novaTask.draggable = 'true';
+                        novaTask.dataset.taskId = task.Id;
                         novaTask.innerHTML = `
-                        <div class="taskHead">
-                            <div class="taskTitle" contenteditable="true">${task.Title || 'Sem título'}</div>
-                            <div class="taskActions">
-                                <button id="minimiza" class="minimiza" contenteditable="false" onclick="minimizarTask(this)">-</button>
-                                <button class="deleteTask" contenteditable="false" onclick="removerTask(this)">X</button>
+                            <div class="taskHead">
+                                <div class="taskTitle" contenteditable="true">${task.Title || 'Sem título'}</div>
+                                <div class="taskActions">
+                                    <button id="minimiza" class="minimiza" contenteditable="false" onclick="minimizarTask(this)">-</button>
+                                    <button class="deleteTask" contenteditable="false" onclick="removerTask(this)">X</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="taskBody">
-                            <div class="taskDescription" contenteditable="true">${task.Description || ''}</div>
-                        </div>
+                            <div class="taskBody">
+                                <div class="taskDescription" contenteditable="true">${task.Description || ''}</div>
+                            </div>
                         `;
                         colunaBody.appendChild(novaTask);
                     });
@@ -246,7 +359,7 @@ async function mostrarQuadro(boardId, boardName) {
                 addTaskButton.onclick = () => adicionarTask(addTaskButton);
 
                 colunaBody.appendChild(addTaskButton);
-                quadro.appendChild(novaColuna);
+                quadroBodyContainer.appendChild(novaColuna);
             });
         }
 
@@ -256,59 +369,125 @@ async function mostrarQuadro(boardId, boardName) {
         addColunaButton.textContent = 'Adicionar coluna +';
         addColunaButton.onclick = addColuna;
 
-        quadro.appendChild(addColunaButton);
+        quadroBodyContainer.appendChild(addColunaButton);
 
     } catch (error) {
-        quadro.innerHTML = '<span style="color:red">Erro ao carregar o quadro.</span>';
-        console.error(error);
+        quadroBodyContainer.innerHTML = '<span style="color:red; padding: 20px;">Erro ao carregar o quadro. Verifique o console.</span>';
+        console.error("Erro ao carregar o quadro completo da API:", error);
+    } finally {
+        hideLoading(); // Esconde loading
     }
 }
 
-window.onload = function () {
-    carregarQuadrosNoDropdown();
-};
-
-function excluirQuadro() {
-    // Exibe um alerta de confirmação
-    const confirmacao = confirm('Tem certeza de que deseja excluir este quadro?');
-
-    if (!confirmacao) {
-        // Se o usuário cancelar, não faz nada
+function adicionarTask(botao) {
+    const coluna = botao.closest('.coluna');
+    if (!coluna || !coluna.dataset.columnId) {
+        alert("Salve o quadro para poder adicionar tarefas a esta coluna.");
         return;
     }
 
-    // Captura o nome do quadro atual
-    const nomeQuadro = document.querySelector('.tituloQuadro span').innerText.trim();
+    const novaTask = document.createElement('div');
+    novaTask.className = 'task';
+    novaTask.draggable = 'true';
+    novaTask.innerHTML = `
+        <div class="taskHead">
+            <div class="taskTitle" contenteditable="true">Nova Task</div>
+            <div class="taskActions">
+                <button id="minimiza" class="minimiza" contenteditable="false" onclick="minimizarTask(this)">-</button>
+                <button class="deleteTask" contenteditable="false" onclick="removerTask(this)">X</button>
+            </div>
+        </div>
+        <div class="taskBody">
+            <div class="taskDescription" contenteditable="true">Descrição da nova task</div>
+        </div>
+    `;
+    coluna.querySelector('.colunaBody').insertBefore(novaTask, botao);
+}
 
-    // Recupera os quadros salvos no localStorage
-    let quadrosSalvos = JSON.parse(localStorage.getItem('quadros')) || [];
-    quadrosSalvos = quadrosSalvos.filter(quadro => quadro.nome !== nomeQuadro);
+function addColuna() {
+    if (!currentBoardId) {
+        alert("Selecione ou crie um quadro primeiro para adicionar colunas.");
+        return;
+    }
 
-    // Atualiza o localStorage com a nova lista de quadros
-    localStorage.setItem('quadros', JSON.stringify(quadrosSalvos));
+    const novaColuna = document.createElement("div");
+    novaColuna.className = 'coluna';
+    novaColuna.draggable = "true";
+    novaColuna.innerHTML = `
+        <div class="colunaHead">
+            <div class="colunaHeadTop">
+                <button id="minimiza" class="minimiza" contenteditable="false" onclick="minimizarLista(this)">-</button>
+                <button class="deleteColuna" onclick="removerColuna(this)">X</button>
+            </div>
+            <h2 contenteditable="true">Nova Coluna</h2>
+        </div>
+        <div class="colunaBody">
+            <div class="adicionarTask" id="addTask" onclick="adicionarTask(this)">Adicionar Task</div>
+        </div>`;
 
-    // Atualiza a lista de quadros no menu "Quadros"
-    atualizarListaQuadros();
+    document.getElementById('colunaBotao').insertAdjacentElement('beforebegin', novaColuna);
+}
 
-    // Limpa o conteúdo do quadro atual
-    const quadroContainer = document.querySelector('.quadro');
-    quadroContainer.innerHTML = ''; // Limpa o conteúdo do quadro
-    document.querySelector('.tituloQuadro span').innerText = '';
+function verificarEnter(event) {
+    if (event.key === "Enter") {
+        criarQuadro();
+    }
+}
 
-    // Oculta o quadro e exibe a tela inicial
-    document.getElementById('QUADRO').style.display = 'none';
-    document.getElementById('telaInicial').style.display = 'flex';
+function removerColuna(element) {
+    const coluna = element.closest('.coluna');
+    if (!coluna) return;
+    const confirmacao = confirm(`Tem certeza de que deseja remover a coluna "${coluna.querySelector('h2').innerText.trim()}" da sua visualização?`);
+    
+    if (!confirmacao) {
+        return; // O usuário cancelou, então não fazemos nada.
+    }
+    coluna.remove();
+}
 
-    alert('Quadro excluído com sucesso!');
+
+async function removerTask(element) {
+    const task = element.closest('.task');
+    if (!task) return;
+
+    const taskId = task.dataset.taskId;
+
+    const confirmacao = confirm(`Tem certeza de que deseja excluir a tarefa "${task.querySelector('.taskTitle').innerText.trim()}"?`);
+    if (!confirmacao) return;
+
+    // Se a task tem um ID (já foi salva na API), tenta deletar da API
+    if (taskId) {
+        showLoading("Excluindo Tarefa...");
+        try {
+            const response = await fetch(`${deleteTaskEndpoint}?TaskId=${taskId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Erro ao deletar tarefa da API: ${response.status} - ${errorText}`);
+            }
+            console.log(`Tarefa com ID ${taskId} deletada da API.`);
+            task.remove(); // Remove do DOM apenas se a deleção na API for bem-sucedida
+        } catch (error) {
+            console.error("Erro ao deletar tarefa da API:", error);
+            alert("Ocorreu um erro ao deletar a tarefa da API. Verifique o console.");
+        } finally {
+            hideLoading();
+        }
+    } else {
+        // Se a task não tem ID, ela ainda não foi salva na API, então apenas remove do DOM
+        task.remove();
+        console.log("Tarefa nova (sem ID) removida localmente.");
+    }
 }
 
 function fecharQuadro() {
-    // Oculta o quadro
-    document.getElementById('QUADRO').style.display = 'none';
-
+    quadroTela.style.display = 'none';
+    currentBoardId = null; // Limpa o ID do quadro atual
+    currentBoardName = ''; // Limpa o nome do quadro atual
 }
 
-//a fazer
 function minimizarTask(botao) {
     const task = botao.closest('.task');
     if (!task) return;
@@ -318,19 +497,55 @@ function minimizarTask(botao) {
     if (estiloCorpo !== 'none') {
         corpo.style.display = 'none';
     } else {
-        corpo.style.display = 'block'; // Garante que o layout flex seja restaurado
+        corpo.style.display = 'block';
     }
 }
 
-function minimizarLista(botao){
+function minimizarLista(botao) {
     const coluna = botao.closest('.coluna');
     if (!coluna) return;
     const lista = coluna.querySelector('.colunaBody');
     if (!lista) return;
     const estilo = window.getComputedStyle(lista).display;
-    if(estilo !== 'none'){
+    if (estilo !== 'none') {
         lista.style.display = 'none';
-    }else{
-        lista.style.display = 'block'; // block funciona para colunaBody
+    } else {
+        lista.style.display = 'block';
     }
 }
+function abrirPaleta(iconeElemento) {
+    if (paletaCores.style.display === 'block') {
+        paletaCores.style.display = 'none';
+        return;
+    }
+     const iconeRect = iconeElemento.getBoundingClientRect();
+    paletaCores.style.display = 'block';
+    paletaCores.style.top = (iconeRect.bottom + window.scrollY + 5) + 'px'; // 5px abaixo do ícone
+    paletaCores.style.left = (iconeRect.left + window.scrollX) + 'px';
+}
+
+function aplicarCorDeFundo(hexColor) {
+    // Aplica a cor ao fundo do quadro na UI
+    quadroBodyContainer.style.backgroundColor = hexColor;
+
+    // Armazena a cor em um atributo 'data-' para fácil acesso ao salvar
+    quadroBodyContainer.dataset.bgColor = hexColor;
+}
+
+// Event listener para o seletor de cores
+seletorCorInput.addEventListener('input', (event) => {
+    aplicarCorDeFundo(event.target.value);
+});
+
+//Fecha a paleta se o usuário clicar fora dela
+window.addEventListener('click', function(event) {
+    if (!paletaCores.contains(event.target) && event.target.className !== 'paleta') {
+        paletaCores.style.display = 'none';
+    }
+});
+
+
+// --- Funções de Inicialização ---
+window.onload = function () {
+    carregarQuadrosNoDropdown();
+};
