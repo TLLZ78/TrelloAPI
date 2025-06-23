@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="stylele.css">
 </head>
 <body>
+    <div id="modal-overlay" style="display: none;"></div>
     
     <div class="navbar">
         <h2>Tralha</h2>
@@ -23,12 +24,17 @@
     </div>
     </div>
 
-    <!-- 
+    
     <div id="telaInicial">
         <h1>Bem-vindo ao Tralha</h1>
-        <button onclick="botaoNovoQuadro()">Criar Novo Quadro</button>
+        <br>
+        <h1>Gerencie seu fluxo de trabalho e organize projetos</h1>
+        <div class="botoes-iniciais">
+            <button onclick="botaoNovoQuadro()">Criar Novo Quadro</button>
+            <button onclick="window.location.href='pesquisa.html'">Lista de Quadros</button>
+        </div>
     </div>
-    -->
+    
 
     <div id="QUADRO" style="display: none;">
         <div class="tituloQuadro">
@@ -58,8 +64,16 @@
         <button type="button" onclick="criarQuadro()">Criar</button>
     </div>
 
+    <!--<div class="botoes">
+    <a href="pesquisa.html" class="dropbtn" style="text-decoration: none; padding: 8px 12px; align-self: center;">Buscar Quadros</a>
+    
+    <button id="btnCriar" class="dropbtn" onclick="botaoNovoQuadro()">Novo Quadro</button>
+    <div class="dropDown">
+        </div>
+    </div>-->
+
     <div class="loadingOverlay" id="loadingOverlay">
-        <img src="https://i.pinimg.com/originals/3d/8c/27/3d8c279c1e7a57a8a6cf71657b98d287.gif" alt="Loading..." style="width: 100px; height: 100px;">
+        <img src="loading.gif" alt="Loading..." style="width: 100px; height: 100px;">
     <span>Salvando Quadro...</span>
     </div>
 

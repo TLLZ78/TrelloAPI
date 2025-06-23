@@ -1,0 +1,85 @@
+/* Conteúdo para o novo arquivo pesquisa.css */
+
+body {
+    background-color: #144272;
+    color: aliceblue;
+    font-family: sans-serif;
+}
+
+.container-principal {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.navbar h2 a{
+    border: none;
+    color: aliceblue; 
+    text-decoration: none;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.barra-busca {
+    margin-bottom: 30px;
+}
+
+#campo-busca {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    border-radius: 8px;
+    border: 2px solid #2C74B3;
+    background-color: #0A2647;
+    color: aliceblue;
+    box-sizing: border-box;
+}
+
+#campo-busca::placeholder {
+    color: #ccc;
+}
+
+#container-quadros {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.quadro-card {
+    background-color: #2C74B3;
+    padding: 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: aliceblue;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 1px solid transparent;
+}
+
+.quadro-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    border-color: #6dd5ed;
+}
+
+.quadro-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+}
+
+.quadro-card p {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.dropbtn{
+    height: fit-content;
+    text-decoration: none; 
+    width: 60px;
+    justify-content: center;
+    align-items: center;
+}

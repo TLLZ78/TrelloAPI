@@ -9,9 +9,10 @@ const deleteTaskEndpoint = "https://personal-ga2xwx9j.outsystemscloud.com/Trello
 let currentBoardId = null; // Armazena o ID do quadro atualmente carregado
 let currentBoardName = ''; // Armazena o nome do quadro atualmente carregado
 
-// --- Elementos DOM para controle de visibilidade/loading ---
+// --- Elementos DOM
 const novoQuadroModal = document.getElementById("novoQuadro");
 const btnCriar = document.getElementById('btnCriar');
+const modalOverlay = document.getElementById('modal-overlay');
 const quadroTela = document.getElementById('QUADRO');
 const quadroBodyContainer = document.querySelector('.quadro'); // Onde as colunas e tasks são injetadas
 const dropdownContent = document.querySelector('.dropDownContent'); // O conteúdo do dropdown "Quadros"
@@ -32,36 +33,32 @@ function hideLoading() {
     loadingOverlay.style.display = 'none';
 }
 
-// --- Funções de Manipulação da UI (Pop-ups, Adicionar/Remover Elementos) ---
+// Funções Pop ups 
 
 function botaoNovoQuadro() {
-    if (novoQuadroModal.style.display === 'none') {
-        novoQuadroModal.style.display = 'flex';
-        document.getElementById('nomeQuadro').value = '';
-    } else {
-        novoQuadroModal.style.display = "none";
-    }
+    modalOverlay.style.display = 'block'; // Mostra o fundo escurecido
+    novoQuadroModal.style.display = 'flex';
+    document.getElementById('nomeQuadro').value = '';
 }
-window.addEventListener('click', function(event) {
+function fecharNovoQuadro() {
+    modalOverlay.style.display = 'none'; // Esconde o fundo
+    novoQuadroModal.style.display = 'none'; // Esconde o modal
+}
+window.addEventListener('click', function(event) { 
     
-    // Primeiro, verifica se o pop-up está visível
-    // Usamos 'flex' porque é o display que você usa para exibi-lo
-    if (novoQuadroModal.style.display === 'flex') {
+    if (event.target === modalOverlay) {
+        fecharNovoQuadro();
+        console.log("Modal fechado pelo clique no overlay.");
+    }
 
-        // Agora, verifica se o alvo do clique NÃO está contido no pop-up
-        // E também se o alvo NÃO é o botão que abre o pop-up (para evitar que ele feche assim que abrir)
-        if (!novoQuadroModal.contains(event.target) && event.target !== btnCriar) {
-            
-            // Se as condições forem verdadeiras, o clique foi fora. Escondemos o pop-up.
-            novoQuadroModal.style.display = 'none';
-            console.log("Pop-up 'Novo Quadro' fechado por clique externo.");
-        }
+    // Lógica para fechar a PALETA DE CORES
+    if (paletaCores.style.display === 'block' && !paletaCores.contains(event.target) && !event.target.classList.contains('paleta')) {
+        paletaCores.style.display = 'none';
     }
 });
 
 async function criarQuadro() {
-    const nomeInput = document.getElementById('nomeQuadro');
-    const nomeQuadro = nomeInput.value.trim();
+    const nomeQuadro = document.getElementById('nomeQuadro').value.trim();
 
     if (nomeQuadro === "") {
         alert("O nome do quadro não pode estar vazio.");
@@ -87,15 +84,16 @@ async function criarQuadro() {
             const errorText = await response.text();
             throw new Error(`Erro ao criar quadro: ${response.status} - ${errorText}`);
         }
-
+        
         const newBoardId = parseInt(await response.text());
         if (isNaN(newBoardId)) {
             throw new Error("ID do quadro inválido retornado pela API.");
         }
 
         alert(`Quadro "${nomeQuadro}" criado com sucesso!`);
-
-        botaoNovoQuadro(); // Oculta o pop-up
+        
+        fecharNovoQuadro(); // Fecha o modal e o overlay.
+        
         await mostrarQuadro(newBoardId, nomeQuadro); // Carrega o quadro recém-criado
         await carregarQuadrosNoDropdown(); // Atualiza o dropdown
 
@@ -267,7 +265,7 @@ async function SaveBoard() {
             }
         }
 
-        alert("Quadro e todo o seu conteúdo salvos com sucesso na API!");
+        alert("Quadro salvo com sucesso na API!");
 
     } catch (error) {
         console.error("Erro ao salvar o quadro completo:", error);
@@ -278,20 +276,15 @@ async function SaveBoard() {
 }
 
 
-async function mostrarQuadro(boardId, boardName) {
-    showLoading("Carregando Quadro..."); // Mostra loading
-
-    // Armazena o ID e nome do quadro atualmente carregado
-    currentBoardId = boardId;
-    currentBoardName = boardName || "Sem Nome"; // Fallback para nome vazio
-
-    // Prepara o título e os botões
-    // O span é para o título, a div.titleBoardActions é para os botões.
-    // O CSS deve posicionar titleBoardActions à direita dentro de .tituloQuadro
-    quadroTituloSpan.textContent = `${boardName ? `#${boardId} ${boardName}` : `#${boardId} Sem Nome`}`;
-
+async function mostrarQuadro(boardId) {
+    // Esconde tela inicial e mostra quadro
+    document.getElementById('telaInicial').style.display = 'none';
     quadroTela.style.display = 'flex';
-    quadroBodyContainer.innerHTML = ''; // Limpa o quadro antes de carregar novos dados
+    
+    quadroTituloSpan.textContent = `Carregando quadro #${boardId}...`;
+    showLoading("Carregando Quadro...");
+    
+    quadroBodyContainer.innerHTML = ''; // Limpa o conteúdo do quadro anterior
 
     try {
         const response = await fetch(`https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/GetCompleteBoard?BoardId=${boardId}`);
@@ -300,18 +293,26 @@ async function mostrarQuadro(boardId, boardName) {
         }
         const boardData = await response.json();
 
-         if (boardData.Board && boardData.Board.HexadecimalColor) {
-                    const corSalva = boardData.Board.HexadecimalColor;
-                    aplicarCorDeFundo(corSalva);
-                    seletorCorInput.value = corSalva; // Atualiza o valor do seletor
-                } else {
-                    // Se não houver cor salva, aplica uma cor padrão
-                    const corPadrao = '#88b0d3';
-                    aplicarCorDeFundo(corPadrao);
-                    seletorCorInput.value = corPadrao;
-                }
+        // 3. APÓS o fetch, pegamos o nome real que veio da resposta da API
+        const realBoardName = boardData.Board.Name || "Sem Nome";
 
+        // 4. E SÓ ENTÃO definimos o título final e as variáveis globais
+        currentBoardId = boardId;
+        currentBoardName = realBoardName;
+        quadroTituloSpan.textContent = `#${boardId} ${realBoardName}`;
+        
+        // Aplica a cor de fundo salva, se houver
+        if (boardData.Board && boardData.Board.HexadecimalColor) {
+            aplicarCorDeFundo(boardData.Board.HexadecimalColor);
+            seletorCorInput.value = boardData.Board.HexadecimalColor;
+        } else {
+            aplicarCorDeFundo('#88b0d3'); // Cor padrão
+            seletorCorInput.value = '#88b0d3';
+        }
+
+        // 5. O resto da função continua normalmente, montando as colunas e tarefas
         if (boardData && Array.isArray(boardData.ColumnStrs)) {
+            // ... (seu código para iterar e criar colunas e tasks continua aqui, sem alterações)
             boardData.ColumnStrs.forEach(colunaData => {
                 const colunaInfo = colunaData.Column;
                 const novaColuna = document.createElement('div');
@@ -321,7 +322,7 @@ async function mostrarQuadro(boardId, boardName) {
                 novaColuna.innerHTML = `
                     <div class="colunaHead">
                         <div class="colunaHeadTop">
-                            <button id="minimiza" class="minimiza" contenteditable="false" onclick="minimizarLista(this)">-</button>
+                            <button class="minimiza" contenteditable="false" onclick="minimizarLista(this)">-</button>
                             <button class="deleteColuna" onclick="removerColuna(this)">X</button>
                         </div>
                         <h2 contenteditable="true">${colunaInfo.Title || 'Sem título'}</h2>
@@ -341,7 +342,7 @@ async function mostrarQuadro(boardId, boardName) {
                             <div class="taskHead">
                                 <div class="taskTitle" contenteditable="true">${task.Title || 'Sem título'}</div>
                                 <div class="taskActions">
-                                    <button id="minimiza" class="minimiza" contenteditable="false" onclick="minimizarTask(this)">-</button>
+                                    <button class="minimiza" contenteditable="false" onclick="minimizarTask(this)">-</button>
                                     <button class="deleteTask" contenteditable="false" onclick="removerTask(this)">X</button>
                                 </div>
                             </div>
@@ -372,7 +373,8 @@ async function mostrarQuadro(boardId, boardName) {
         quadroBodyContainer.appendChild(addColunaButton);
 
     } catch (error) {
-        quadroBodyContainer.innerHTML = '<span style="color:red; padding: 20px;">Erro ao carregar o quadro. Verifique o console.</span>';
+        quadroBodyContainer.innerHTML = `<span style="color:red; padding: 20px;">Erro ao carregar o quadro #${boardId}. Verifique o console.</span>`;
+        quadroTituloSpan.textContent = `Erro ao carregar quadro`;
         console.error("Erro ao carregar o quadro completo da API:", error);
     } finally {
         hideLoading(); // Esconde loading
@@ -483,9 +485,16 @@ async function removerTask(element) {
 }
 
 function fecharQuadro() {
-    quadroTela.style.display = 'none';
-    currentBoardId = null; // Limpa o ID do quadro atual
-    currentBoardName = ''; // Limpa o nome do quadro atual
+
+    // Esconde a área do quadro
+    document.getElementById('QUADRO').style.display = 'none';
+    // Mostra a tela inicial novamente
+    document.getElementById('telaInicial').style.display = 'flex';
+
+    currentBoardId = null; 
+    currentBoardName = ''; 
+    // Limpa a URL para remover o ?boardId=... se ele existir
+    window.history.pushState({}, document.title, window.location.pathname);
 }
 
 function minimizarTask(botao) {
@@ -548,4 +557,16 @@ window.addEventListener('click', function(event) {
 // --- Funções de Inicialização ---
 window.onload = function () {
     carregarQuadrosNoDropdown();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const boardIdFromURL = urlParams.get('boardId');
+
+    if (boardIdFromURL) {
+        // Se um ID veio da URL, mostra o quadro diretamente
+        mostrarQuadro(boardIdFromURL); 
+    } else {
+        // Se não, mostra a tela inicial
+        document.getElementById('telaInicial').style.display = 'flex';
+        document.getElementById('QUADRO').style.display = 'none';
+    }
 };

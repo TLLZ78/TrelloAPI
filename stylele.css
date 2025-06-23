@@ -102,18 +102,25 @@ a{
 }
 
 .novoQuadro {
-    display: none;
+    display: none; /* Mantém escondido inicialmente */
     flex-direction: column;
+    
+    /* --- INÍCIO DA CORREÇÃO --- */
+    position: fixed; /* Fixa o modal na tela */
+    top: 50%; /* Posiciona o topo do elemento no meio da tela */
+    left: 50%; /* Posiciona a esquerda do elemento no meio da tela */
+    transform: translate(-50%, -50%); /* Centraliza o elemento perfeitamente */
+    z-index: 1000; /* Garante que ele fique na frente de tudo */
+    /* --- FIM DA CORREÇÃO --- */
+
     background-color: #2C74B3;
-    margin-top: 40px;
-    border: 3px solid #144272; /* Borda mais suave */
-    border-radius: 12px; /* Bordas mais arredondadas */
+    border: 3px solid #144272;
+    border-radius: 12px;
     width: 448px;
-    height: auto; /* Altura automática para se ajustar ao conteúdo */
-    padding: 20px; /* Adicionei um pouco de padding interno */
+    height: auto;
+    padding: 20px;
     color: aliceblue;
-    justify-self: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Sombra mais suave */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .novoQuadroHead {
@@ -374,23 +381,30 @@ padding-bottom: 18px;
 }
 
 #telaInicial {
-    display: flex; 
+    display: none; 
     flex-direction: column; 
     justify-content: center; 
     align-items: center; 
     height: 100vh; 
     text-align: center; 
-    background-color: #f4f4f4; 
+    background-color: #868686;
+    background-image: url("fundologo2.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
     font-family: Arial, sans-serif;
 }
 
 #telaInicial h1 {
+    text-shadow: 2px 4px 6px black;
     font-size: 2.5rem; /* Tamanho maior para o título */
-    color: #205295; /* Cor do título */
+    color: #f4f4f4; /* Cor do título */
     margin-bottom: 20px; /* Espaço abaixo do título */
 }
 
 #telaInicial button {
+    display: flex;
+    flex-direction: row;
     padding: 10px 20px; 
     font-size: 1rem; 
     background-color: #205295; 
@@ -534,4 +548,24 @@ padding-bottom: 18px;
     border: none;
     cursor: pointer;
     background-color: transparent;
+}
+
+.botoes-iniciais {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#modal-overlay { /*fundo escuro para modal*/
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* 60% de opacidade */
+    z-index: 999; 
+    display: none; 
 }
