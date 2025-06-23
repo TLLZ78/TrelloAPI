@@ -57,10 +57,11 @@ h1 {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     border: 1px solid transparent;
+    transform: translateY(-5px);
 }
 
 .quadro-card:hover {
-    transform: translateY(-5px);
+    
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     border-color: #6dd5ed;
 }
@@ -71,9 +72,21 @@ h1 {
     word-wrap: break-word;
 }
 
+.quadro-card p:not(.quadroDesc) {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    margin: 0;
+    text-align: right;
+    width: auto;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
 .quadro-card p {
     font-size: 0.9em;
     opacity: 0.8;
+    margin-bottom: 0;
 }
 
 .dropbtn{
@@ -82,4 +95,13 @@ h1 {
     width: 60px;
     justify-content: center;
     align-items: center;
+}
+
+.quadroDesc {
+    font-size: 0.85em;
+    margin-top: 32px; /* Espaço para o ID acima */
+    margin-bottom: 0;
+    color: #e0e6ed;
+    opacity: 0.85;
+    display: block;
 }
