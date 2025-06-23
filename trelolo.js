@@ -70,7 +70,7 @@ async function criarQuadro() {
     try {
         const boardData = {
             Name: nomeQuadro,
-            Description: "",
+            //Description: "",
             BackgroundColor: ""
         };
 
@@ -164,7 +164,19 @@ async function SaveBoard() {
     showLoading("Salvando Quadro..."); // Mostra loading
 
     try {
-        // 1. Coleta os dados do quadro atual (nome, Id)
+        // Busca a descrição atual do quadro antes de salvar
+        let currentDescription = "";
+        try {
+            const response = await fetch(`https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/GetCompleteBoard?BoardId=${currentBoardId}`);
+            if (response.ok) {
+                const boardData = await response.json();
+                currentDescription = boardData.Board && boardData.Board.Description ? boardData.Board.Description : "";
+            }
+        } catch (e) {
+            // Se falhar, mantém a descrição vazia
+            console.warn("Não foi possível buscar a descrição atual do quadro. Prosseguindo sem ela.");
+        }
+
         // Pega o texto do span de título, removendo o ID para obter apenas o nome
         const boardTitleText = quadroTituloSpan.textContent;
         const boardName = boardTitleText.replace(`#${currentBoardId}`, '').trim();
@@ -173,8 +185,8 @@ async function SaveBoard() {
         const boardToSave = {
             Id: currentBoardId,
             Name: boardName,
-            Description: "",
-            HexadecimalColor: backgroundColor // Se você tiver um campo para descrição do quadro, adicione aqui
+            Description: currentDescription, // Mantém a descrição já salva
+            HexadecimalColor: backgroundColor
         };
 
         // Salva/Atualiza o quadro principal
@@ -191,7 +203,7 @@ async function SaveBoard() {
         console.log(`Quadro "${boardToSave.Name}" (ID: ${currentBoardId}) salvo/atualizado com sucesso.`);
 
 
-        // 2. Coleta e salva/atualiza as colunas
+        // Coleta e salva/atualiza as colunas
         const colunasElementos = quadroBodyContainer.querySelectorAll('.coluna');
         for (const colunaElemento of colunasElementos) {
             const columnId = colunaElemento.dataset.columnId ? parseInt(colunaElemento.dataset.columnId) : 0;
@@ -226,7 +238,7 @@ async function SaveBoard() {
                 console.log(`Coluna "${columnTitle}" (ID: ${columnId}) atualizada.`);
             }
 
-            // 3. Coleta e salva/atualiza as tasks dentro desta coluna
+            // Coleta e salva/atualiza as tasks dentro desta coluna
             const tasksElementos = colunaElemento.querySelectorAll('.task');
             for (const taskElemento of tasksElementos) {
                 const taskId = taskElemento.dataset.taskId ? parseInt(taskElemento.dataset.taskId) : 0;
@@ -293,13 +305,11 @@ async function mostrarQuadro(boardId) {
         }
         const boardData = await response.json();
 
-        // 3. APÓS o fetch, pegamos o nome real que veio da resposta da API
         const realBoardName = boardData.Board.Name || "Sem Nome";
 
-        // 4. E SÓ ENTÃO definimos o título final e as variáveis globais
         currentBoardId = boardId;
         currentBoardName = realBoardName;
-        quadroTituloSpan.textContent = `#${boardId} ${realBoardName}`;
+        quadroTituloSpan.textContent = `#${boardId} ${realBoardName}`; //injeta nome e id no cabeçalho do quadro
         
         // Aplica a cor de fundo salva, se houver
         if (boardData.Board && boardData.Board.HexadecimalColor) {
@@ -310,9 +320,8 @@ async function mostrarQuadro(boardId) {
             seletorCorInput.value = '#88b0d3';
         }
 
-        // 5. O resto da função continua normalmente, montando as colunas e tarefas
         if (boardData && Array.isArray(boardData.ColumnStrs)) {
-            // ... (seu código para iterar e criar colunas e tasks continua aqui, sem alterações)
+            // injeta Colunas e Tasks no .quadro
             boardData.ColumnStrs.forEach(colunaData => {
                 const colunaInfo = colunaData.Column;
                 const novaColuna = document.createElement('div');
@@ -353,17 +362,17 @@ async function mostrarQuadro(boardId) {
                         colunaBody.appendChild(novaTask);
                     });
                 }
-
+                //adiciona botao nova task
                 const addTaskButton = document.createElement('div');
                 addTaskButton.className = 'adicionarTask';
                 addTaskButton.textContent = 'Adicionar Task';
                 addTaskButton.onclick = () => adicionarTask(addTaskButton);
-
                 colunaBody.appendChild(addTaskButton);
+                //finalmente adiciona a coluna completa ao quadro
                 quadroBodyContainer.appendChild(novaColuna);
             });
         }
-
+        //adiciona botao Nova coluna
         const addColunaButton = document.createElement('div');
         addColunaButton.className = 'adicionarC';
         addColunaButton.id = 'colunaBotao';

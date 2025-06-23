@@ -102,17 +102,13 @@ a{
 }
 
 .novoQuadro {
-    display: none; /* Mantém escondido inicialmente */
+    display: none; 
     flex-direction: column;
-    
-    /* --- INÍCIO DA CORREÇÃO --- */
-    position: fixed; /* Fixa o modal na tela */
+    position: fixed;
     top: 50%; /* Posiciona o topo do elemento no meio da tela */
     left: 50%; /* Posiciona a esquerda do elemento no meio da tela */
     transform: translate(-50%, -50%); /* Centraliza o elemento perfeitamente */
     z-index: 1000; /* Garante que ele fique na frente de tudo */
-    /* --- FIM DA CORREÇÃO --- */
-
     background-color: #2C74B3;
     border: 3px solid #144272;
     border-radius: 12px;
@@ -124,45 +120,45 @@ a{
 }
 
 .novoQuadroHead {
-    border-bottom: 1px solid #144272; /* Borda inferior mais suave */
-    height: auto; /* Altura automática */
-    padding-bottom: 15px; /* Adicionei padding inferior */
+    border-bottom: 1px solid #144272; 
+    height: auto;
+    padding-bottom: 15px;
     text-align: center;
-    background-color: transparent; /* Removi a cor de fundo repetitiva */
+    background-color: transparent; 
 }
 
 .novoQuadro h2 {
-    margin-top: 0; /* Removi a margem superior padrão */
+    margin-top: 0; 
     font-size: 1.7em;
-    color: aliceblue; /* Garante a cor do título */
+    color: aliceblue; 
 }
 
 .novoQuadro label {
     margin-top: 15px;
-    margin-left: 0; /* Removi a margem esquerda */
+    margin-left: 0; 
     margin-bottom: 8px;
-    font-size: 1.1em; /* Ajustei o tamanho da fonte da label */
-    color: aliceblue; /* Garante a cor da label */
-    display: block; /* Faz a label ocupar a largura total */
+    font-size: 1.1em; 
+    color: aliceblue; 
+    display: block; 
 }
 
 .novoQuadro input {
-    align-self: stretch; /* Faz o input ocupar a largura total do pai */
-    width: auto; /* Deixa a largura ser controlada pelo 'stretch' */
-    height: 30px; /* Aumentei um pouco a altura do input */
-    padding: 8px; /* Adicionei padding ao input */
-    border: 1px solid #144272; /* Borda mais suave no input */
-    border-radius: 6px; /* Bordas arredondadas no input */
-    box-sizing: border-box; /* Garante que padding e border não aumentem a largura total */
+    align-self: stretch; 
+    width: auto; 
+    height: 30px; 
+    padding: 8px; 
+    border: 1px solid #144272; 
+    border-radius: 6px; 
+    box-sizing: border-box; 
 }
 
 .novoQuadro button {
     align-self: center;
     margin-top: 20px;
     width: 128px;
-    height: 2.5em; /* Aumentei um pouco a altura do botão */
-    border: none; /* Removi a borda padrão do botão */
-    border-radius: 6px; /* Bordas arredondadas no botão */
+    height: 2.5em; 
+    border: none; 
+    border-radius: 6px; 
     background-color: #205295;
     color: aliceblue;
     font-size: 1em;
@@ -233,7 +229,7 @@ a{
 
 .coluna h2{
     margin-left: 8px;
-    margin-top: 8px;
+    margin-top: 20px;
 }
 
 .colunaBody{
