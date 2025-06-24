@@ -6,8 +6,8 @@ const criaTaskEndPoint = "https://personal-ga2xwx9j.outsystemscloud.com/Trellosp
 const deleteTaskEndpoint = "https://personal-ga2xwx9j.outsystemscloud.com/Trellospl/rest/Trello/DeleteTask";
 
 // --- Variáveis globais para gerenciar o estado do quadro atual ---
-let currentBoardId = null; // Armazena o ID do quadro atualmente carregado
-let currentBoardName = ''; // Armazena o nome do quadro atualmente carregado
+let currentBoardId = null; 
+let currentBoardName = ''; 
 
 // --- Elementos DOM
 const novoQuadroModal = document.getElementById("novoQuadro");
@@ -48,7 +48,6 @@ window.addEventListener('click', function(event) {
     
     if (event.target === modalOverlay) {
         fecharNovoQuadro();
-        console.log("Modal fechado pelo clique no overlay.");
     }
 
     // Lógica para fechar a PALETA DE CORES
@@ -88,7 +87,7 @@ async function criarQuadro() {
         const newBoardId = parseInt(await response.text());
         if (isNaN(newBoardId)) {
             throw new Error("ID do quadro inválido retornado pela API.");
-        }
+        }   
 
         alert(`Quadro "${nomeQuadro}" criado com sucesso!`);
         
@@ -392,11 +391,6 @@ async function mostrarQuadro(boardId) {
 
 function adicionarTask(botao) {
     const coluna = botao.closest('.coluna');
-    if (!coluna || !coluna.dataset.columnId) {
-        alert("Salve o quadro para poder adicionar tarefas a esta coluna.");
-        return;
-    }
-
     const novaTask = document.createElement('div');
     novaTask.className = 'task';
     novaTask.draggable = 'true';
