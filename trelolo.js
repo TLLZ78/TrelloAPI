@@ -483,7 +483,6 @@ async function removerTask(element) {
     } else {
         // Se a task não tem ID, ela ainda não foi salva na API, então apenas remove do DOM
         task.remove();
-        console.log("Tarefa nova (sem ID) removida localmente.");
     }
 }
 
@@ -573,3 +572,50 @@ window.onload = function () {
         document.getElementById('QUADRO').style.display = 'none';
     }
 };
+
+function editaNome() {
+    if (document.getElementById('input-edita-nome')) {
+        return;
+    }
+    const nomeAtual = currentBoardName;
+
+    quadroTituloSpan.style.display = 'none';
+
+    // Cria um elemento <input> dinamicamente.
+    const inputNome = document.createElement('input');
+    inputNome.type = 'text';
+    inputNome.id = 'input-edita-nome'; 
+    inputNome.className = 'titulo-input';
+    inputNome.value = nomeAtual;
+
+    // Adiciona o input ao lado do span.
+    quadroTituloSpan.parentNode.insertBefore(inputNome, quadroTituloSpan.nextSibling);
+    inputNome.focus(); // Foca o cursor no input para o usuário já poder digitar.
+
+    const finalizarEdicao = () => {
+        // Remove o input da tela e exibe titulo
+        inputNome.remove();
+        quadroTituloSpan.style.display = 'inline';
+    };
+
+    inputNome.addEventListener('keydown', (e) => {
+        // Se a tecla for "Enter"
+        if (e.key === 'Enter') {
+            const novoNome = inputNome.value.trim();
+            if (novoNome) { 
+                currentBoardName = novoNome;
+                quadroTituloSpan.textContent = `#${currentBoardId} ${novoNome}`;
+            }
+            finalizarEdicao();
+        }
+        // Se a tecla for "Esc"
+        if (e.key === 'Escape') {
+            finalizarEdicao(); // Apenas cancela, sem salvar o novo nome.
+        }
+    });
+
+    // Cancela edição se o usuario clicar fora do input
+    inputNome.addEventListener('blur', () => {
+        finalizarEdicao();
+    });
+}
