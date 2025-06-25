@@ -99,7 +99,7 @@ h1 {
 
 .quadroDesc {
     font-size: 0.85em;
-    margin-top: 32px; /* Espaço para o ID acima */
+    margin-top: 32px; 
     margin-bottom: 0;
     color: #e0e6ed;
     opacity: 0.85;
